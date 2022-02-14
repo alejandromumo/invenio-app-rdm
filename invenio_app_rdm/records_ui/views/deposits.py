@@ -19,6 +19,7 @@ from invenio_rdm_records.proxies import current_rdm_records
 from invenio_rdm_records.resources.serializers import UIJSONSerializer
 from invenio_rdm_records.services.schemas import RDMRecordSchema
 from invenio_rdm_records.services.schemas.utils import dump_empty
+from invenio_userprofiles import current_userprofile
 from invenio_vocabularies.proxies import current_service as vocabulary_service
 from invenio_vocabularies.records.models import VocabularyScheme
 from marshmallow_utils.fields.babel import gettext_from_dict
@@ -292,6 +293,7 @@ def dashboard(dashboard_name=None):
         dashboard_name=dashboard_name or current_app.config[
             "_DASHBOARD_ROUTES"][0],
         searchbar_config=dict(searchUrl=get_search_url()),
+        username=current_userprofile.username
     )
 
 

@@ -6,6 +6,7 @@
  * Invenio is free software; you can redistribute it and/or modify it
  * under the terms of the MIT License; see LICENSE file for more details.
  */
+import _ from "lodash";
 
 import { SearchApp } from "@js/invenio_search_ui/components";
 import { i18next } from "@translations/invenio_app_rdm/i18next";
@@ -13,7 +14,7 @@ import _camelCase from "lodash/camelCase";
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import { overrideStore } from "react-overridable";
-import { Container, Tab } from "semantic-ui-react";
+import { Container, Tab, Menu } from "semantic-ui-react";
 import { defaultComponents as CommunitiesDefaultComponents } from "./components/communities";
 import { defaultComponents as UploadsDefaultComponents } from "./components/uploads";
 import { defaultComponents as RequestsDefaultComponents } from "./components/requests";
@@ -68,11 +69,17 @@ class DashboardTabs extends Component {
         rootElement.dataset[_camelCase(pane.configDataAttribute)]
       );
       return {
-        menuItem: pane.label,
+        menuItem: (
+          <Menu.Item key={index} className="selected-menu-tab">
+            {pane.label}
+          </Menu.Item>
+        ),
         render: () => (
-          <Tab.Pane>
-            <SearchApp appName={appId} key={appId} config={config} />
-          </Tab.Pane>
+          <Container>
+            <Tab.Pane>
+              <SearchApp appName={appId} key={appId} config={config} />
+            </Tab.Pane>
+          </Container>
         ),
       };
     });
@@ -83,12 +90,20 @@ class DashboardTabs extends Component {
     replaceURLPathname(activePane.pathname);
   };
 
+
+
   render() {
+    const Element = Tab;
+    // apply custom menu rendering
+    Element.prototype.renderMenu = renderMenuCustom;
+
     return (
-      <Container>
-        <Tab
+      <Container fluid>
+        <Element
+          id="dashboard-tab"
           defaultActiveIndex={this.state.defaultActiveTab}
           panes={this.panes}
+          menu={{ secondary: true, pointing: true }}
           onTabChange={this.onTabChange}
           renderActiveOnly={true}
         />
@@ -98,3 +113,28 @@ class DashboardTabs extends Component {
 }
 
 ReactDOM.render(<DashboardTabs />, rootElement);
+
+// custom menu component for Tab rendering
+function renderMenuCustom() {
+    const { menu, panes, menuPosition } = this.props;
+    const { activeIndex } = this.state;
+
+    if (menu.tabular === true && menuPosition === "right") {
+      menu.tabular = "right";
+    }
+
+    return (
+      <Container fluid id="dashboard-tab-menu-container">
+        <Container>
+          {Menu.create(menu, {
+            autoGenerateKey: false,
+            overrideProps: {
+              items: _.map(panes, "menuItem"),
+              onItemClick: this.handleItemClick,
+              activeIndex,
+            },
+          })}
+        </Container>
+      </Container>
+    );
+  }
