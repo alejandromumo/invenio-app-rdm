@@ -287,11 +287,13 @@ def new_record():
 @login_required
 def dashboard(dashboard_name=None):
     """Display user dashboard page."""
+    if not current_app.config["COMMUNITIES_ENABLED"] or not dashboard_name:
+        dashboard_name = current_app.config["_DASHBOARD_ROUTES"][0]
     return render_template(
         "invenio_app_rdm/records/dashboard.html",
-        dashboard_name=dashboard_name or current_app.config[
-            "_DASHBOARD_ROUTES"][0],
+        dashboard_name=dashboard_name,
         searchbar_config=dict(searchUrl=get_search_url()),
+        communities_enabled=current_app.config["COMMUNITIES_ENABLED"]
     )
 
 
@@ -306,6 +308,9 @@ def deposit_create(community=None):
         record=new_record(),
         files=dict(
             default_preview=None, entries=[], links={}
+        ),
+        communities_enabled = current_app.config.get(
+            "COMMUNITIES_ENABLED", False
         ),
         community=community
     )

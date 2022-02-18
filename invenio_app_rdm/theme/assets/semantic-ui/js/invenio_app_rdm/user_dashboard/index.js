@@ -20,12 +20,17 @@ import { defaultComponents as RequestsDefaultComponents } from "./components/req
 
 const rootElement = document.getElementById("invenio-user-dashboard");
 
-const TAB_PANES = [
+let TAB_PANES = [];
+
+const DEFAULT_TAB_PANES = [
   {
     configDataAttribute: "invenio-search-user-uploads-config",
     label: i18next.t("Uploads"),
     pathname: "uploads",
   },
+];
+
+const COMMUNITY_TAB_PANES = [
   {
     configDataAttribute: "invenio-search-user-communities-config",
     label: i18next.t("Communities"),
@@ -45,6 +50,13 @@ class DashboardTabs extends Component {
   constructor(props) {
     super(props);
     const activeTabName = rootElement.dataset[_camelCase("active-tab-name")];
+    const communitiesEnabled =
+      rootElement.dataset[_camelCase("communities-enabled")] === "True";
+
+    TAB_PANES = communitiesEnabled
+      ? DEFAULT_TAB_PANES.concat(COMMUNITY_TAB_PANES)
+      : DEFAULT_TAB_PANES;
+
     const routes = TAB_PANES.map((pane) => pane.pathname);
     this.state = {
       defaultActiveTab: routes.indexOf(activeTabName),
